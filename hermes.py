@@ -1,9 +1,9 @@
 import os
 import sys
+import json
 import Queue
 import signal
 import inspect
-import cPickle
 import threading
 from   time      import sleep
 from   pyinotify import Notifier, EventsCodes, WatchManager, ProcessEvent
@@ -48,12 +48,12 @@ class Hermes:
         self.err_dir = os.path.join(self.folder, "err")
 
     def __parse_task(self, file_name):
-        """Unpickles a job file and verifies that it contains
+        """Serializes a job file and verifies that it contains
         a dictionary with a registered job type"""
         task_file = os.path.join(self.in_dir, file_name)
         try:
-            task = cPickle.load(open(task_file, "rb"))
-        except:
+            task = json.load(open(task_file))
+        except ValueError:
             return False
 
         if not isinstance(task, dict) or not 'type' in task:
@@ -92,7 +92,7 @@ class Hermes:
                 os.remove(source)
 
     def __process_queue(self):
-        """Unpickle the content and process the job."""
+        """Serializes the content and process the job."""
         while self.run:
             # Block for one second
             try:
