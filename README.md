@@ -14,7 +14,7 @@ When the class is initialized it expects a path to the folder to watch. The fold
 Usage
 ======
 
-The usage is very simple. You need to define processors, initialize hermes with the path to the folder to watch, register processors with hermes and call start() method to start all the threads. By default hermes run in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=true' to the start() method.
+The usage is very simple. You need to define processors, initialize hermes with the path to the folder to watch, register processors with hermes and call start() method to start all the threads. By default hermes runs in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=True' to the start() method.
 
 ```python
 import hermes
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     hermes = hermes.Hermes('/tmp/jobs')
     hermes.register({'email':    send_email})
     hermes.register({'download': Download})
-    hermes.start(daemon=true)
+    hermes.start(daemon=True)
 ```
 
 To send jobs, just pickle the dictionaries with the data for your jobs and save them into the defined folder. Hermes will pick it up from there.
