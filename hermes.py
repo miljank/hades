@@ -30,8 +30,6 @@ class Hermes:
         # Watch objects
         self.wm          = WatchManager()
         self.mask        = EventsCodes.FLAG_COLLECTIONS['OP_FLAGS']['IN_CREATE']
-        # Pool of threads
-        self.tpool       = []
         # Parent folder to watch
         self.folder      = folder
         # Number of threads to start
@@ -139,8 +137,6 @@ class Hermes:
             thread = threading.Thread(target=task)
             # Start a thread
             thread.start()
-            # Save thread reference
-            self.tpool.append(thread)
 
     def __start_daemon(self):
         """Forks a daemon process and starts all the threads"""
