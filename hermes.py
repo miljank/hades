@@ -49,6 +49,9 @@ class Hermes:
         """Serializes a job file and verifies that it contains
         a dictionary with a registered job type"""
         task_file = os.path.join(self.in_dir, file_name)
+        if not os.path.isfile(task_file):
+            return False
+
         try:
             task = json.load(open(task_file))
         except ValueError:
@@ -67,11 +70,7 @@ class Hermes:
         processor = self.processors[task['type']]
         if inspect.isfunction(processor):
             return processor(task)
-        elif inspect.isclass(processor):
-            return processor().run(task)
-        else:
-            self.qerr.put(task)
-            return True
+        return processor().run(task)
 
     def __process_failed_task(self):
         """Saves or removes failed tasks"""
@@ -82,12 +81,15 @@ class Hermes:
             except Queue.Empty:
                 continue
 
-            source = os.path.join(self.in_dir,  task["file"])
+            task_file = os.path.join(self.in_dir,  task["file"])
+            if not os.path.isfile(task_file):
+                return False
+
             if self.save_failed:
                 destination = os.path.join(self.err_dir, task["file"])
-                os.rename(source, destination)
+                os.rename(task_file, destination)
             else:
-                os.remove(source)
+                os.remove(task_file)
 
     def __process_queue(self):
         """Serializes the content and process the job."""
@@ -99,24 +101,25 @@ class Hermes:
                 continue
 
             task = self.__parse_task(job["file"])
-            if task:
-                if self.__process_task(task):
-                    os.remove(os.path.join(self.in_dir, job["file"]))
-                    self.qin.task_done()
-                    continue
-
-                if job["retries"] < 1:
-                    self.qerr.put(job)
-                    self.qin.task_done()
-                    continue
-
-                job["retries"] = job["retries"] - 1
-                self.qin.put(job)
+            if not task:
+                self.qerr.put(job)
                 self.qin.task_done()
                 continue
 
-            self.qerr.put(job)
+            if self.__process_task(task):
+                os.remove(os.path.join(self.in_dir, job["file"]))
+                self.qin.task_done()
+                continue
+
+            if job["retries"] < 1:
+                self.qerr.put(job)
+                self.qin.task_done()
+                continue
+
+            job["retries"] = job["retries"] - 1
+            self.qin.put(job)
             self.qin.task_done()
+            continue
 
     def __watcher(self):
         """Starts the folder watcher"""
@@ -194,16 +197,6 @@ class Hermes:
         self.__start_threads(self.__process_queue,       number_of_threads=self.threads)
         self.__start_threads(self.__process_failed_task, number_of_threads=1)
 
-    def register(self, task):
-        """Register a job type with the processor."""
-        self.processors.update(task)
-
-    def start(self, daemon=False):
-        if daemon:
-            self.__start_daemon()
-        else:
-            self.__start_interactive()
-
     class WatchForChange(ProcessEvent):
         """Watches a folder for new files and starts a job processing."""
         def __init__(self, hermes):
@@ -212,3 +205,18 @@ class Hermes:
         def process_IN_CREATE(self, event):
             sleep(.1)
             self.hermes.qin.put({"retries": self.hermes.retries, "file": event.name})
+
+    def register(self, task):
+        """Register a job type with the processor."""
+        for key, value in task.items():
+            if not inspect.isclass(value) and \
+               not inspect.isfunction(value):
+                raise ValueError("Processor for the task {0} is not a class or a function.".format(key))
+
+            self.processors.update({key: value})
+
+    def start(self, daemon=False):
+        if daemon:
+            self.__start_daemon()
+        else:
+            self.__start_interactive()
