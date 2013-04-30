@@ -136,21 +136,23 @@ class Hermes:
     def __start_threads(self, task, number_of_threads=5):
         """Starts the threads and adds them to the pool"""
         for i in range(number_of_threads):
-            # Create a thread
             thread = threading.Thread(target=task)
-            # Start a thread
             thread.start()
 
-    def __start_daemon(self):
-        """Forks a daemon process and starts all the threads"""
-        # Fork a child and exit
+    def __fork(self):
+        """Forks a child process and stops the parent"""
         try:
             pid = os.fork()
             if pid > 0:
                 os._exit(0)
         except OSError, e:
-            print("error: Fork #1 failed: %d (%s)" % (e.errno, e.strerror))
+            print("error: Fork failed: {0} ({1})".format(e.errno, e.strerror))
             sys.exit(1)
+
+    def __start_daemon(self):
+        """Forks a daemon process and starts all the threads"""
+        # Fork a child and exit
+        self.__fork()
 
         # We are now in the child
         # Release file handlers and create new session
@@ -160,13 +162,7 @@ class Hermes:
 
         # We need to fork again
         # otherwise, zombie processes might be created
-        try:
-            pid = os.fork()
-            if pid > 0:
-                os._exit(0)
-        except OSError, e:
-            print("error: Fork #2 failed: %d (%s)" % (e.errno, e.strerror))
-            sys.exit(2)
+        self.__fork()
 
         self.__start_all_workers()
         while self.run:
