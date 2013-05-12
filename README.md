@@ -9,7 +9,11 @@ Jobs are discovered by watching a folder on the file system for new files. If a 
 
 A file needs to be a json document with a 'type' key matching one of the registered job types.
 
-When the class is initialized it expects a path to the folder to watch. The folder needs to have two subfolders: 'in' for incoming jobs, and 'err' where failed jobs will be stored.
+When the class is initialized it expects a path to the folder to watch. The folder needs to have three subfolders: 'in' for incoming jobs, 'cur' for storing successfully processed jobs (this can be disabled by passing save_successful=False to the class), and 'err' for storing failed jobs (this can be disabled by passing save_failed=False to the class).
+
+By default a pool of 5 processing threads will be started. This can be tuned by passing threads=N to the class.
+
+If a job processing fails, it will be reprocessed few more times as defined by retries attribute (default is 3). If this is not desired it can be disabled by passing retries=0 to the class.
 
 Usage
 ======
