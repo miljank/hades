@@ -67,12 +67,29 @@ class Hermes:
 
         return task
 
+    def __wait_for_child(self, pid):
+        rc = os.waitpid(pid, os.WNOHANG)
+        while rc == (0, 0):
+            if not self.run:
+                os.kill(pid, signal.SIGTERM)
+                os.waitpid(pid, 0)
+                return False
+
+            sleep(.1)
+            rc = os.waitpid(pid, os.WNOHANG)
+        return rc[1]
+
     def __process_task(self, task):
         """Runs a registered processor for that specific job type"""
-        processor = self.processors[task['type']]
-        if inspect.isfunction(processor):
-            return processor(task)
-        return processor().run(task)
+        pid = os.fork()
+        if pid == 0:
+            processor = self.processors[task['type']]
+            if inspect.isfunction(processor):
+                os._exit(0) if processor(task) else os._exit(1)
+            os._exit(0) if processor().run(task) else os._exit(1)
+        else:
+            rc = self.__wait_for_child(pid)
+            return True if rc == 0 else False
 
     def __process_failed_task(self):
         """Saves or removes failed tasks"""
