@@ -23,21 +23,21 @@ class Hermes:
     If a task fails it will be reprocessed and eventually moved to the error folder."""
     def __init__(self, folder, threads=5, retries=3, save_successful=True, save_failed=True):
         # Signals if the threads should exit or not
-        self.run         = True
+        self.run             = True
         # Queues
-        self.qin         = Queue.Queue()
-        self.qerr        = Queue.Queue()
+        self.qin             = Queue.Queue()
+        self.qerr            = Queue.Queue()
         # Watch objects
-        self.wm          = WatchManager()
-        self.mask        = EventsCodes.FLAG_COLLECTIONS['OP_FLAGS']['IN_CREATE']
+        self.wm              = WatchManager()
+        self.mask            = EventsCodes.FLAG_COLLECTIONS['OP_FLAGS']['IN_CREATE']
         # Parent folder to watch
-        self.folder      = folder
+        self.folder          = folder
         # Number of threads to start
-        self.threads     = threads
+        self.threads         = threads
         # Number of times to reprocess failed task
-        self.retries     = retries - 1
+        self.retries         = retries - 1
         # The list of registered processors
-        self.processors  = {}
+        self.processors      = {}
         # Save failed tasks
         self.save_failed     = save_failed
         self.save_successful = save_successful
