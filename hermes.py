@@ -21,7 +21,7 @@ class Hermes:
     accept the content of the job as an input. E.g. Processor().run(job)
 
     If a task fails it will be reprocessed and eventually moved to the error folder."""
-    def __init__(self, folder, threads=5, retries=3, save_failed=True):
+    def __init__(self, folder, threads=5, retries=3, save_successful=True, save_failed=True):
         # Signals if the threads should exit or not
         self.run         = True
         # Queues
@@ -39,10 +39,12 @@ class Hermes:
         # The list of registered processors
         self.processors  = {}
         # Save failed tasks
-        self.save_failed = save_failed
+        self.save_failed     = save_failed
+        self.save_successful = save_successful
 
         # Folders
         self.in_dir  = os.path.join(self.folder, "in")
+        self.cur_dir = os.path.join(self.folder, "cur")
         self.err_dir = os.path.join(self.folder, "err")
 
     def __parse_task(self, file_name):
@@ -81,15 +83,15 @@ class Hermes:
             except Queue.Empty:
                 continue
 
-            task_file = os.path.join(self.in_dir,  task["file"])
-            if not os.path.isfile(task_file):
+            source = os.path.join(self.in_dir,  task["file"])
+            if not os.path.isfile(source):
                 return False
 
             if self.save_failed:
                 destination = os.path.join(self.err_dir, task["file"])
-                os.rename(task_file, destination)
+                os.rename(source, destination)
             else:
-                os.remove(task_file)
+                os.remove(source)
 
     def __process_queue(self):
         """Serializes the content and process the job."""
@@ -107,7 +109,12 @@ class Hermes:
                 continue
 
             if self.__process_task(task):
-                os.remove(os.path.join(self.in_dir, job["file"]))
+                if self.save_successful:
+                    source      = os.path.join(self.in_dir,  job["file"])
+                    destination = os.path.join(self.cur_dir, job["file"])
+                    os.rename(source, destination)
+                else:
+                    os.remove(source)
                 self.qin.task_done()
                 continue
 
