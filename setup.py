@@ -19,6 +19,7 @@ setup(
     version          = hades.__version__,
     license          = 'GPLv2',
     packages         = ['hades'],
+    requires         = ['pyinotify'],
     keywords         = 'asynchronous job processing json tasks'.split(),
     description      = 'A daemon for asynchronous job processing',
     author_email     = 'miljank _at_ gmail.com',
