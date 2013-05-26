@@ -9,7 +9,7 @@ from   distutils.core import setup
 import hades
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_dir, 'README.md')) as f:
+with open(os.path.join(this_dir, 'README.rst')) as f:
     long_description = '\n{0}'.format(f.read())
 
 setup(
@@ -18,7 +18,6 @@ setup(
     author           = 'Miljan Karadzic',
     version          = hades.__version__,
     license          = 'GPLv2',
-    platform         = 'Linux',
     packages         = ['hades'],
     requires         = ['pyinotify'],
     provides         = ['hades'],
