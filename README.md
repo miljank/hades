@@ -1,7 +1,7 @@
-hermes
+Hades
 ======
 
-Hermes is an multithreaded asynchronous job processing class. It allows you to register different job types and associate processor functions or classes with those job types.
+Hades is an multithreaded asynchronous job processing class. It allows you to register different job types and associate processor functions or classes with those job types.
 
 Job processor function needs to expect job data as input. If a job processor is a class, it needs to have run() method that expects job data as input.
 
@@ -18,10 +18,10 @@ If a job processing fails, it will be reprocessed few more times as defined by r
 Usage
 ======
 
-The usage is very simple. You need to define processors, initialize hermes with the path to the folder to watch, register processors with hermes and call start() method to start all the threads. By default hermes runs in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=True' to the start() method.
+The usage is very simple. You need to define processors, initialize Hades with the path to the folder to watch, register processors with Hades and call start() method to start all the threads. By default Hades runs in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=True' to the start() method.
 
 ```python
-import hermes
+import hades
 
 class Download:
     def run(self, task):
@@ -33,13 +33,13 @@ def send_email(task):
     return True
 
 if __name__ == '__main__':
-    hermes = hermes.Hermes('/tmp/jobs')
-    hermes.register({'email':    send_email})
-    hermes.register({'download': Download})
-    hermes.start(daemon=True)
+    hades = hades.Hades('/tmp/jobs')
+    hades.register({'email':    send_email})
+    hades.register({'download': Download})
+    hades.start(daemon=True)
 ```
 
-To send jobs, just deserialize a json object containing the data for your jobs and save them into the defined folder. Hermes will pick it up from there.
+To send jobs, just deserialize a json object containing the data for your jobs and save them into the defined folder. Hades will pick it up from there.
 
 ```python
 import json

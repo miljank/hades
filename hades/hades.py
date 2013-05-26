@@ -8,8 +8,8 @@ import threading
 from   time      import sleep
 from   pyinotify import Notifier, EventsCodes, WatchManager, ProcessEvent
 
-class Hermes:
-    """Hermes is a job processing class. It watches a folder for new jobs and
+class Hades:
+    """Hades is a job processing class. It watches a folder for new jobs and
     runs a registered processor for that specific job type.
 
     A processor can be either a function or class. A processor needs to return
@@ -219,12 +219,12 @@ class Hermes:
 
     class WatchForChange(ProcessEvent):
         """Watches a folder for new files and starts a job processing."""
-        def __init__(self, hermes):
-            self.hermes = hermes
+        def __init__(self, hades):
+            self.hades = hades
 
         def process_IN_CREATE(self, event):
             sleep(.1)
-            self.hermes.qin.put({"retries": self.hermes.retries, "file": event.name})
+            self.hades.qin.put({"retries": self.hades.retries, "file": event.name})
 
     def register(self, task):
         """Register a job type with the processor."""
