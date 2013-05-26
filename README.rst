@@ -1,3 +1,4 @@
+======
 Hades
 ======
 
@@ -15,12 +16,12 @@ By default a pool of 5 processing threads will be started. This can be tuned by 
 
 If a job processing fails, it will be reprocessed few more times as defined by retries attribute (default is 3). If this is not desired it can be disabled by passing retries=0 to the class.
 
+======
 Usage
 ======
 
 The usage is very simple. You need to define processors, initialize Hades with the path to the folder to watch, register processors with Hades and call start() method to start all the threads. By default Hades runs in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=True' to the start() method.
 
-```python
 import hades
 
 class Download:
@@ -37,11 +38,10 @@ if __name__ == '__main__':
     hades.register({'email':    send_email})
     hades.register({'download': Download})
     hades.start(daemon=True)
-```
+::
 
 To send jobs, just deserialize a json object containing the data for your jobs and save them into the defined folder. Hades will pick it up from there.
 
-```python
 import json
 
 email = {'type':    'email',
@@ -56,4 +56,4 @@ download = {'type': 'download',
 
 json.dump(email, open("/tmp/jobs/in/email", "w"))
 json.dump(download, open("/tmp/jobs/in/download", "w"))
-```
+::
