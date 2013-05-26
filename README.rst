@@ -16,44 +16,46 @@ By default a pool of 5 processing threads will be started. This can be tuned by 
 
 If a job processing fails, it will be reprocessed few more times as defined by retries attribute (default is 3). If this is not desired it can be disabled by passing retries=0 to the class.
 
-======
+*******
 Usage
-======
+*******
 
 The usage is very simple. You need to define processors, initialize Hades with the path to the folder to watch, register processors with Hades and call start() method to start all the threads. By default Hades runs in interactive mode. If you want to run it in a daemon mode, just pass 'daemon=True' to the start() method.
 
-import hades
+::
 
-class Download:
-    def run(self, task):
-        print("Downloading page: {0}".format(task['url']))
+    import hades
+
+    class Download:
+        def run(self, task):
+            print("Downloading page: {0}".format(task['url']))
+            return True
+
+    def send_email(task):
+        print("Email for: {0}".format(task['rcpt']))
         return True
 
-def send_email(task):
-    print("Email for: {0}".format(task['rcpt']))
-    return True
-
-if __name__ == '__main__':
-    hades = hades.Hades('/tmp/jobs')
-    hades.register({'email':    send_email})
-    hades.register({'download': Download})
-    hades.start(daemon=True)
-::
+    if __name__ == '__main__':
+        hades = hades.Hades('/tmp/jobs')
+        hades.register({'email':    send_email})
+        hades.register({'download': Download})
+        hades.start(daemon=True)
 
 To send jobs, just deserialize a json object containing the data for your jobs and save them into the defined folder. Hades will pick it up from there.
 
-import json
-
-email = {'type':    'email',
-         'from':    'no@mail.com',
-         'rcpt':    'test@example.com',
-         'subject': 'Test email',
-         'body':    'Hi there!'}
-
-download = {'type': 'download',
-            'url':  'http://www.miljan.org/',
-            'file': '/tmp/miljan.org.html'}
-
-json.dump(email, open("/tmp/jobs/in/email", "w"))
-json.dump(download, open("/tmp/jobs/in/download", "w"))
 ::
+
+    import json
+
+    email = {'type':    'email',
+             'from':    'no@mail.com',
+             'rcpt':    'test@example.com',
+             'subject': 'Test email',
+             'body':    'Hi there!'}
+
+    download = {'type': 'download',
+                'url':  'http://www.miljan.org/',
+                'file': '/tmp/miljan.org.html'}
+
+    json.dump(email, open("/tmp/jobs/in/email", "w"))
+    json.dump(download, open("/tmp/jobs/in/download", "w"))
