@@ -5,8 +5,9 @@ import Queue
 import signal
 import inspect
 import threading
-from   time      import sleep
-from   pyinotify import Notifier, EventsCodes, WatchManager, ProcessEvent
+from time import sleep
+from pyinotify import Notifier, EventsCodes, WatchManager, ProcessEvent
+
 
 class Hades:
     """Hades is a job processing class. It watches a folder for new jobs and
@@ -23,27 +24,27 @@ class Hades:
     If a task fails it will be reprocessed and eventually moved to the error folder."""
     def __init__(self, folder, threads=5, retries=3, save_successful=True, save_failed=True):
         # Signals if the threads should exit or not
-        self.run             = True
+        self.run = True
         # Queues
-        self.qin             = Queue.Queue()
-        self.qerr            = Queue.Queue()
+        self.qin = Queue.Queue()
+        self.qerr = Queue.Queue()
         # Watch objects
-        self.wm              = WatchManager()
-        self.mask            = EventsCodes.FLAG_COLLECTIONS['OP_FLAGS']['IN_CREATE']
+        self.wm = WatchManager()
+        self.mask = EventsCodes.FLAG_COLLECTIONS['OP_FLAGS']['IN_CREATE']
         # Parent folder to watch
-        self.folder          = folder
+        self.folder = folder
         # Number of threads to start
-        self.threads         = threads
+        self.threads = threads
         # Number of times to reprocess failed task
-        self.retries         = retries - 1
+        self.retries = retries - 1
         # The list of registered processors
-        self.processors      = {}
+        self.processors = {}
         # Save failed tasks
-        self.save_failed     = save_failed
+        self.save_failed = save_failed
         self.save_successful = save_successful
 
         # Folders
-        self.in_dir  = os.path.join(self.folder, "in")
+        self.in_dir = os.path.join(self.folder, "in")
         self.cur_dir = os.path.join(self.folder, "cur")
         self.err_dir = os.path.join(self.folder, "err")
 
@@ -115,7 +116,7 @@ class Hades:
         while self.run:
             # Block for one second
             try:
-                job  = self.qin.get(True, 1)
+                job = self.qin.get(True, 1)
             except Queue.Empty:
                 continue
 
@@ -127,7 +128,7 @@ class Hades:
 
             if self.__process_task(task):
                 if self.save_successful:
-                    source      = os.path.join(self.in_dir,  job["file"])
+                    source = os.path.join(self.in_dir,  job["file"])
                     destination = os.path.join(self.cur_dir, job["file"])
                     os.rename(source, destination)
                 else:
